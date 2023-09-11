@@ -1,0 +1,206 @@
+---
+title: "QMM ASSIGNMENT"
+author: "Saurabh Patloori"
+date: "2023-09-10"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
+
+# Install and load packages
+
+tinytex::install_tinytex()
+writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
+
+```
+Question 1
+---
+title: "Back Savers Backpack Production Optimization"
+output: html_document
+---
+
+# Problem Statement
+
+Back Savers is a company that produces backpacks primarily for students. They are considering offering two different models—the Collegiate and the Mini. Both are made out of the same rip-resistant nylon fabric. Management wishes to know what quantity of each type of backpack to produce per week.
+
+They have the following information:
+
+- Supplier: 5000 square-foot shipment of nylon fabric per week.
+- Backpack requirements:
+  - Each Collegiate requires 3 square feet.
+  - Each Mini requires 2 square feet.
+- Sales forecasts:
+  - At most 1000 Collegiates can be sold per week.
+  - At most 1200 Minis can be sold per week.
+- Labor:
+  - 35 laborers, each provides 40 hours of labor per week.
+  - Each Collegiate requires 45 minutes of labor.
+  - Each Mini requires 40 minutes of labor.
+- Profit per unit:
+  - Collegiate: $32 profit per unit.
+  - Mini: $24 profit per unit.
+
+## Decision Variables
+
+- \(X\): Number of Collegiate backpacks to produce per week.
+- \(Y\): Number of Mini backpacks to produce per week.
+
+## Objective Function
+
+Maximize the total profit (\(Z\)):
+
+\[Z = 32X + 24Y\]
+
+## Constraints
+
+1. Material Constraint:
+
+\[
+3X + 2Y \leq 5000
+\]
+
+2. Sales Constraints:
+
+\[
+X \leq 1000
+\]
+
+\[
+Y \leq 1200
+\]
+
+3. Labor Constraint:
+
+\[
+45X + 40Y \leq 35 \times 40 \times 60
+\]
+
+4. Non-negativity Constraints:
+
+\[
+X \geq 0
+\]
+
+\[
+Y \geq 0
+\]
+
+# Solution using R
+
+```{r}
+
+# Define the objective function coefficients
+obj_coef <- c(32, 24)
+
+# Define the matrix of constraint coefficients
+mat_coef <- matrix(c(3, 2, 1, 0, 0, 1, 45, 40), ncol = 2, byrow = TRUE)
+
+# Define the right-hand side of constraints
+rhs <- c(5000, 1000, 1200, 35 * 40 * 60)
+
+# Define the constraint types (<=)
+con_types <- rep("<=", length(rhs))
+
+# Solve the linear programming problem
+lp_result <- lp("max", obj_coef, mat_coef, con_types, rhs)
+
+# Print the solution
+cat("Collegiate backpacks to produce per week:", lp_result$solution[1], "\n")
+cat("Mini backpacks to produce per week:", lp_result$solution[2], "\n")
+cat("Maximum profit per week:", lp_result$objval, "\n")
+
+```
+
+Question 2
+
+---
+title: "Weigelt Corporation Production Optimization"
+output: html_document
+---
+
+# Problem Statement
+
+The Weigelt Corporation has three branch plants with excess production capacity. They have a new product that can be made in three sizes—large, medium, and small—with net unit profits of $420, $360, and $300, respectively. Each plant has a different capacity to produce the new product, and there are constraints on storage space. Management wants to determine how much of each size should be produced at each plant to maximize profit while using the same percentage of excess capacity at each plant.
+
+## Decision Variables
+
+Let's define the decision variables:
+- \(X_1\): The number of large-sized units produced at Plant 1.
+- \(X_2\): The number of medium-sized units produced at Plant 2.
+- \(X_3\): The number of small-sized units produced at Plant 3.
+
+## Objective Function
+
+Maximize the total profit (\(Z\)):
+\[Z = 420X_1 + 360X_2 + 300X_3\]
+
+## Constraints
+
+1. Capacity Constraints:
+   - Plant 1 can produce up to 750 units per day.
+   - Plant 2 can produce up to 900 units per day.
+   - Plant 3 can produce up to 450 units per day.
+   \[X_1 \leq 750\]
+   \[X_2 \leq 900\]
+   \[X_3 \leq 450\]
+
+2. Storage Space Constraints:
+   - Plant 1 has 13,000 square feet of in-process storage space.
+   - Plant 2 has 12,000 square feet of in-process storage space.
+   - Plant 3 has 5,000 square feet of in-process storage space.
+   - Each unit of the large, medium, and small sizes produced per day requires 20, 15, and 12 square feet, respectively.
+   \[20X_1 + 15X_2 + 12X_3 \leq 13,000\]
+   \[20X_1 + 15X_2 + 12X_3 \leq 12,000\]
+   \[20X_1 + 15X_2 + 12X_3 \leq 5,000\]
+
+3. Sales Forecasts:
+   - Sales forecasts indicate that if available, 900, 1,200, and 750 units of the large, medium, and small sizes, respectively, would be sold per day.
+   \[X_1 \leq 900\]
+   \[X_2 \leq 1200\]
+   \[X_3 \leq 750\]
+
+4. Non-negativity Constraints:
+   \[X_1 \geq 0\]
+   \[X_2 \geq 0\]
+   \[X_3 \geq 0\]
+
+# Solution using R
+
+```{r}
+chooseCRANmirror(graphics=FALSE)
+# Define the objective function coefficients
+obj_coef <- c(420, 360, 300)
+
+# Define the matrix of constraint coefficients
+mat_coef <- matrix(c(
+  1, 0, 0, 1, 0, 0, 1, 0, 0,
+  0, 1, 0, 0, 1, 0, 0, 1, 0,
+  0, 0, 1, 0, 0, 1, 0, 0, 1,
+  1, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 1, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 1, 0, 0, 0, 0, 0, 0,
+  -1, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, -1, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, -1, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, -20, -15, -12, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, -20, -15, -12
+), ncol = 3, byrow = TRUE)
+
+# Define the right-hand side of constraints
+rhs <- c(750, 900, 450, 13000, 12000, 5000, 900, 1200, 750, 0, 0)
+
+# Define the constraint types (<=)
+con_types <- rep("<=", length(rhs))
+
+# Solve the linear programming problem
+lp_result <- lp("max", obj_coef, mat_coef, con_types, rhs)
+
+# Print the solution
+cat("Number of large-sized units produced at Plant 1:", lp_result$solution[1], "\n")
+cat("Number of medium-sized units produced at Plant 2:", lp_result$solution[2], "\n")
+cat("Number of small-sized units produced at Plant 3:", lp_result$solution[3], "\n")
+cat("Maximum profit per day:", lp_result$objval, "\n")
+```
